@@ -16,6 +16,12 @@ $(document).ready(function()
 	var fps = 60;
 	var moveSpeed = 10;
 
+	var renderStats = new Stats();
+	document.body.appendChild(renderStats.domElement);
+
+	var updateStats = new Stats();
+	document.body.appendChild(updateStats.domElement);
+
 	var get_pixel = function(x,y,canvasData,offsetX,offsetY){
 	
 		x = x + offsetX;
@@ -254,25 +260,24 @@ $(document).ready(function()
 	function drawHud(){
 		ctx.fillStyle = "black";
 		ctx.font = '20pt Calibri';
-		ctx.fillText('score: '+score, 10, 25);
+		ctx.fillText('score: '+score, 10, h-20);
 	}
 
 
 	function init(){
 		roof = new Roof();
 		roof2 = new Roof2();
-		
 		heli = new Helicopter();
-	
-
 		score = 0;
 	}
 
 	init();
 
 	function run() {
+		updateStats.update();
 		update();
         draw();
+        renderStats.update();
     }
 
     (function() {
