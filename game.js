@@ -13,9 +13,10 @@ $(document).ready(function()
 	var roof = null;
 	var roof2 = null;
 	var heli = null;
+	var fps = 60;
+	var moveSpeed = 10;
 
 	var get_pixel = function(x,y,canvasData,offsetX,offsetY){
-
 	
 		x = x + offsetX;
 		y = y + offsetY;
@@ -43,18 +44,18 @@ $(document).ready(function()
 		}
 	};
 
-
 	var Helicopter = function()
 	{
 		this.position = new vector(100,200);
 		this.velocity  = new vector(0,2);
-		this.gravity = 2;
+		this.gravity = 1;
 		this.burst = 0;
 		this._width = 10;
 		this._height = 10;
 		this.mayBurst = false;
 		this.imgd = null;
 
+		
 		this.getPosition = function()
 		{
 			return this.position;
@@ -84,17 +85,17 @@ $(document).ready(function()
 
 			this.position.y += this.velocity.y;
 			score +=1;
-			this.imgd = ctx.getImageData(80, 0,100, h);
+			this.imgd = ctx.getImageData(0, 0,w, h);
+			//console.log(this.getPosition().x)
 			col = this.hitTest();
-			this.draw();
-
+			
 			if(col)init();
 	
 		}
 
 		this.hitTest = function(){
 			color = "rgba(139,9,19,255)";
-			var rect = new Rectangle(this.getPosition().x,this.getPosition().y,10,10);
+			var rect = new Rectangle(this.getPosition().x,Math.round(this.getPosition().y),10,10);
 			for (var i = 0; i < rect.grid.length; i++) {
 				var x = rect.grid[i][0];
 				var y = rect.grid[i][1];
@@ -149,7 +150,7 @@ $(document).ready(function()
 		this.moveRoof = function(){
 			for (var i = 0; i < walls.length; i++) {
 				 _wall = walls[i];
-				 _wall.getPosition().x -=7;
+				 _wall.getPosition().x -=moveSpeed;
 				 if(_wall.getPosition().x < -300)
 				 {
 				 	walls.splice(i,1);
@@ -157,8 +158,6 @@ $(document).ready(function()
 				 	walls.push(_wall);
 				 }
 			};
-
-			this.paintRoof();
 		}
 
 		this.paintRoof = function(){
@@ -194,7 +193,7 @@ $(document).ready(function()
 		this.moveRoof = function(){
 			for (var i = 0; i < walls.length; i++) {
 				 _wall = walls[i];
-				 _wall.getPosition().x -=7;
+				 _wall.getPosition().x -=moveSpeed;
 				 if(_wall.getPosition().x < -300)
 				 {
 				 	walls.splice(i,1);
@@ -202,8 +201,6 @@ $(document).ready(function()
 				 	walls.push(_wall);
 				 }
 			};
-
-			this.paintRoof();
 		}
 
 		this.paintRoof = function(){
@@ -226,14 +223,23 @@ $(document).ready(function()
 		}
 	}
 
+
+
 	
 	function update(){
+		
 
-		paint();
-		//roof.paintRoof();
 		roof.moveRoof();
 		roof2.moveRoof();
 		heli.update();
+		
+	}
+
+	function draw(){
+		paint();
+		roof.paintRoof();
+		roof2.paintRoof();
+		heli.draw();
 		drawHud();
 	}
 
@@ -252,26 +258,45 @@ $(document).ready(function()
 	}
 
 
-
-
 	function init(){
 		roof = new Roof();
 		roof2 = new Roof2();
 		
 		heli = new Helicopter();
-		heli.imgd = ctx.getImageData(0, 0, w, h);
+	
 
 		score = 0;
-
-		if(typeof game_loop != "undefined") clearInterval(game_loop);
-	  	game_loop = setInterval(update, 20);
 	}
 
 	init();
-	
-	
-	
 
+	function run() {
+		update();
+        draw();
+    }
+
+    (function() {
+        var onEachFrame;
+        if (window.webkitRequestAnimationFrame) {
+          onEachFrame = function(cb) {
+            var _cb = function() { cb(); webkitRequestAnimationFrame(_cb); }
+            _cb();
+          };
+        } else if (window.mozRequestAnimationFrame) {
+          onEachFrame = function(cb) {
+            var _cb = function() { cb(); mozRequestAnimationFrame(_cb); }
+            _cb();
+          };
+        } else {
+          onEachFrame = function(cb) {
+            setInterval(cb, 1000 / 60);
+          }
+        }
+        
+        window.onEachFrame = onEachFrame;
+      })();
+
+      window.onEachFrame(run);
 	
 
 	window.addEventListener("keydown", function (e) {
